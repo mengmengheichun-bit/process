@@ -3,259 +3,858 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nâng cấp Soft Cheese Lab</title>
+<title>Thư viện IELTS Writing Task 1</title>
 <style>
-  body {
-    margin: 0; background: #10201b; color: #fff4de;
-    font: 1rem/1.6 system-ui, sans-serif;
-  }
-  main { max-width: 680px; margin: 8vh auto; padding: 24px; }
-  label { display: block; margin-bottom: 6px; }
-  button { display: block; margin-top: 16px; padding: 10px 15px; font: inherit; }
+:root {
+  color-scheme: dark;
+  --bg:#10201b; --panel:#192d25; --line:#466052;
+  --ink:#fff4de; --muted:#bed0c2; --green:#bce8a9; --gold:#f5cd81;
+}
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body {
+  margin:0; min-height:100vh; color:var(--ink);
+  background:radial-gradient(ellipse at top,#233c30,var(--bg) 65%);
+  font:16px/1.55 system-ui,sans-serif;
+}
+main { max-width:1150px; margin:auto; padding:24px 18px 54px; }
+header, .row { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+header { justify-content:space-between; padding-bottom:15px; border-bottom:1px solid var(--line); }
+h1 { font-size:clamp(2rem,6vw,3.7rem); line-height:1.08; margin:20px 0 12px; }
+h2,h3,p { margin:0 0 10px; }
+small,.muted { color:var(--muted); }
+.brand { color:var(--green); font:800 .9rem ui-monospace,monospace; letter-spacing:.09em; }
+button,input,select,textarea { font:inherit; }
+button,.button {
+  display:inline-block; border:1px solid #658573; border-radius:5px;
+  background:#253e30; color:var(--ink); padding:8px 12px;
+  cursor:pointer; text-decoration:none; font-weight:650;
+}
+button:hover:not(:disabled),.button:hover { filter:brightness(1.15); }
+button:disabled { cursor:default; opacity:.56; }
+:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+.primary { color:#2b2015; background:var(--gold); border-color:var(--gold); }
+input,select,textarea {
+  width:100%; padding:10px 12px; border:1px solid #688477; border-radius:5px;
+  background:#102019; color:var(--ink);
+}
+textarea { resize:vertical; min-height:90px; }
+label { display:grid; gap:4px; font-weight:650; }
+.filters,.fields,.layout { display:grid; gap:14px; }
+.filters { grid-template-columns:1fr 180px; margin-top:20px; }
+.fields { grid-template-columns:1fr 1fr; }
+.layout { grid-template-columns:1.1fr 1fr; align-items:start; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,265px),1fr)); gap:12px; }
+.card,details.panel { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; }
+.lesson { max-width:470px; overflow-wrap:anywhere; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 13px; }
+.chip { color:var(--green); background:#294533; padding:4px 8px; border-radius:4px; font-size:.87rem; }
+button.chip[aria-pressed="true"] { border-color:var(--gold); }
+details.panel { margin-top:18px; }
+summary { cursor:pointer; color:var(--green); font-weight:700; }
+form { display:grid; gap:9px; margin:13px 0 0; }
+#count,#catalogStatus { margin:10px 0; }
+.scene { position:relative; margin:0 -16px 12px; }
+canvas { display:block; width:100%; height:auto; image-rendering:pixelated; }
+#hotspots { position:absolute; inset:0; pointer-events:none; }
+.hotspot {
+  position:absolute; transform:translate(-50%,-50%); pointer-events:auto;
+  white-space:nowrap; min-height:36px; padding:4px 6px;
+  background:#fff1c5; color:#302418; border:2px solid #604932;
+  box-shadow:2px 3px #121c17; font:750 clamp(.62rem,1.45vw,.82rem) ui-monospace,monospace;
+}
+#stages,.flow { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:12px 0; }
+#stages span,.flow div {
+  border:1px solid var(--line); padding:7px; background:#1e3229;
+  font-size:.84rem; overflow-wrap:anywhere;
+}
+#stages [aria-current] { border-color:var(--gold); color:var(--gold); }
+.flow strong { display:block; color:var(--green); }
+#observation,.feedback { color:var(--green); }
+#observation { min-height:1.55em; }
+.feedback { border-left:3px solid var(--gold); background:#23372b; padding:9px 11px; margin:10px 0; }
+.stack { display:grid; gap:10px; }
+.stack details { padding:8px 10px; border:1px solid var(--line); }
+dl { margin-bottom:0; }
+dt { font-weight:700; }
+dd { margin:0 0 9px; color:var(--muted); }
+.report textarea { margin-bottom:12px; }
+.note { font-size:.9rem; color:var(--muted); font-weight:400; }
+.error { color:#ffb4a3; }
+@media(max-width:730px) {
+  .layout,.fields { grid-template-columns:1fr; }
+  .flow { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:480px) {
+  .filters { grid-template-columns:1fr; }
+  #stages span { padding:4px; font-size:.68rem; }
+}
 </style>
 </head>
 <body>
 <main>
-  <h1>Nâng cấp Soft Cheese Lab</h1>
-  <label for="source">Chọn file Soft_Cheese_Lab.html hiện tại</label>
-  <input id="source" type="file" accept=".html,.htm,text/html">
-  <button id="build" type="button">Tải bản nâng cấp</button>
-  <p id="status" role="status"></p>
+<header>
+  <span class="brand">IELTS WRITING TASK 1</span>
+  <div class="row">
+    <a class="button" href="#" id="homeLink" hidden>Về thư viện</a>
+    <button type="button" id="sound" aria-pressed="false" hidden>Bật âm thanh</button>
+  </div>
+</header>
+
+<section id="home">
+  <h1>Thư viện bài học</h1>
+  <div class="filters">
+    <label>Tìm bài học
+      <input id="search" type="search" placeholder="Ví dụ: cheese, fermentation, bản đồ">
+    </label>
+    <label>Dạng bài
+      <select id="filter">
+        <option value="">Tất cả</option>
+        <option>Process</option><option>Map</option><option>Chart</option><option>Vocabulary</option>
+      </select>
+    </label>
+  </div>
+  <p id="count" class="muted" aria-live="polite"></p>
+  <div id="cards" class="cards"></div>
+
+  <details class="panel" id="manager">
+    <summary>Quản lý bài học</summary>
+    <p class="note">Thêm bài HTML, rồi xuất danh mục để lưu thành <code>lessons.json</code> trên GitHub.</p>
+    <div class="row">
+      <button id="importJson" type="button">Nhập JSON</button>
+      <button id="exportJson" type="button">Xuất JSON</button>
+      <input id="jsonFile" type="file" accept=".json,application/json" hidden>
+    </div>
+    <form id="addLesson">
+      <div class="fields">
+        <label>Tên bài <input name="title" required maxlength="100"></label>
+        <label>Dạng bài
+          <select name="type">
+            <option>Process</option><option>Map</option><option>Chart</option><option>Vocabulary</option>
+          </select>
+        </label>
+      </div>
+      <label>Đường dẫn HTML <input name="path" required placeholder="lessons/tea.html"></label>
+      <label>Mô tả <input name="description" maxlength="240"></label>
+      <label>Từ khóa, cách nhau bằng dấu phẩy <input name="tags" placeholder="tea, process"></label>
+      <div><button class="primary" type="submit" id="saveLesson">Thêm bài</button> <button id="cancelEdit" type="button" hidden>Hủy sửa</button></div>
+    </form>
+    <p id="catalogStatus" role="status"></p>
+  </details>
+</section>
+
+<section id="game" hidden>
+  <h1>Soft Cheese Lab</h1>
+  <nav id="stages" aria-label="Tiến độ qua các công đoạn"></nav>
+  <div id="workbench" class="layout">
+    <section class="card">
+      <h2 id="stageTitle"></h2>
+      <div class="scene">
+        <canvas id="canvas" width="280" height="156" role="img" aria-label="Xưởng phô mai pixel art"></canvas>
+        <div id="hotspots"></div>
+      </div>
+      <p id="instruction"></p>
+      <p id="observation" role="status"></p>
+    </section>
+    <section class="card">
+      <h2>Writing Notebook</h2>
+      <p id="locked" class="muted">Hoàn thành thao tác trong xưởng để mở cụm từ và câu hỏi.</p>
+      <div id="notebook" hidden>
+        <p class="note">Bấm vào cụm từ để xem nghĩa và khung câu.</p>
+        <div class="chips" id="stagePhrases"></div>
+        <p class="feedback" id="gloss" hidden></p>
+        <label for="stageDraft" id="stagePrompt"></label>
+        <textarea id="stageDraft" placeholder="Write your English sentence…" spellcheck="false"></textarea>
+        <div class="row">
+          <button id="stageCompare" type="button">Xem câu mẫu</button>
+          <button id="next" class="primary" type="button" disabled>Lưu và tiếp tục</button>
+        </div>
+        <p class="feedback" id="stageAnswer" role="status" hidden></p>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" id="report" hidden>
+    <h2>Write the full report</h2>
+    <p class="muted">The diagram shows how soft cheese is produced. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>
+    <div class="flow" id="flow"></div>
+    <div class="layout">
+      <aside class="stack" id="reference" aria-label="Từ vựng và ghi chú"></aside>
+      <div class="report">
+        <div id="reportFields"></div>
+        <p id="words" class="muted"></p>
+        <button id="reportCompare" class="primary" type="button" disabled>Xem bài mẫu</button>
+        <div id="reportAnswer" class="feedback" hidden></div>
+      </div>
+    </div>
+    <div class="row"><button id="restart" type="button">Chơi lại</button></div>
+  </section>
+</section>
 </main>
+
 <script>
-function installReport() {
-  const additions = [
-    [
-      ["mix milk and water", "trộn sữa và nước · Milk and water are mixed together."],
-      ["after mixing", "sau khi trộn · After mixing, the mixture is …"]
-    ],
-    [
-      ["be kept at", "được giữ ở · The mixture is kept at ___°C for ___ hours."],
-      ["before salt is added", "trước khi thêm muối · The mixture is cooled before salt is added."]
-    ],
-    [
-      ["subsequently", "tiếp đó · Salt is subsequently added to the mixture."],
-      ["for a further six hours", "trong sáu giờ tiếp theo · The mixture ferments for a further six hours."]
-    ],
-    [
-      ["once fermentation is complete", "sau khi lên men xong · Once fermentation is complete, the mixture is …"],
-      ["through an outlet at the top", "qua lỗ thoát phía trên · Steam escapes through an outlet at the top."]
-    ],
-    [
-      ["be separated by filtration", "được tách bằng cách lọc · The two outputs are separated by filtration."],
-      ["through the upper / lower filter", "qua bộ lọc trên / dưới · The finished product is collected through …"]
-    ]
-  ];
+"use strict";
+const $ = id => document.getElementById(id);
 
-  const introduction = [
-    ["illustrate how … is produced", "mô tả cách sản xuất · The diagram illustrates how ___ is produced."],
-    ["the stages involved in producing", "các công đoạn sản xuất · The diagram shows the stages involved in producing ___."]
-  ];
-
-  const summary = [
-    ["consist of five stages", "gồm năm công đoạn · The process consists of five stages."],
-    ["begin with / end with", "bắt đầu / kết thúc bằng · It begins with ___ and ends with ___."],
-    ["gradually thicken", "dần đặc lại · The mixture gradually thickens."],
-    ["be released at different stages", "được thải ra ở các công đoạn khác nhau · ___ and ___ are released at different stages."],
-    ["take the longest", "mất nhiều thời gian nhất · The ___ stage takes the longest."]
-  ];
-
-  const model = [
-    "The diagram illustrates how soft cheese is produced from milk and water.",
-    "Overall, the process consists of five stages, beginning with the mixing of the two ingredients and ending with cooling and filtration. The mixture gradually thickens, and steam and wastewater are released at different stages. Evaporation is the longest stage.",
-    "Initially, milk and water are combined and stirred. The resulting mixture is then cooled and kept at 5°C for two hours. Salt is subsequently added, after which fermentation takes place at 35°C for six hours.",
-    "Once fermentation is complete, the mixture is heated to 100°C for eight hours. During this stage, moisture escapes as steam through an outlet at the top. The thickened mixture is then cooled again and kept at 5°C for a further six hours. Finally, the two outputs are separated by filtration. Wastewater drains through the lower filter, while the finished soft cheese is collected through the upper filter."
-  ];
-
-  additions.forEach((items, i) => stages[i].phrases.push(...items));
-  stages[1].check = "Dùng to cho mức nhiệt đạt tới, at cho mức nhiệt được giữ và for cho thời lượng. Có thể viết: cooled to 5°C and kept at that temperature for two hours.";
-
-  const node = (tag, text, className) => {
-    const element = document.createElement(tag);
-    if (text) element.textContent = text;
-    if (className) element.className = className;
-    return element;
-  };
-
-  const style = node("style", `
-    .report-layout { display:grid; grid-template-columns:minmax(250px,1fr) minmax(320px,1.35fr); gap:16px; margin-top:18px; }
-    .report-layout > * { min-width:0; }
-    .report-tools { display:grid; gap:10px; align-content:start; }
-    .report-tools details { padding:10px 12px; border:1px solid var(--line); border-radius:4px; }
-    .report-tools summary { cursor:pointer; color:var(--green); font-weight:700; }
-    .report-tools dd { margin:2px 0 10px; color:var(--dim); }
-    .report-tools dt { color:var(--ink); font-weight:650; }
-    .report-editor textarea { min-height:90px; }
-    .report-editor .note { margin-bottom:6px; }
-    .report-label { display:block; margin-top:12px; font-weight:700; }
-    .report-model p + p { margin-top:10px; }
-    @media(max-width:760px){ .report-layout {grid-template-columns:1fr;} }
-  `);
-  document.head.append(style);
-
-  const finish = $("finish");
-  finish.querySelector("h2").textContent = "Write the full report";
-  const stageNotes = finish.querySelector(".drafts");
-  stageNotes.querySelector("summary").textContent = "Your five stage notes";
-  const layout = node("div", "", "report-layout");
-  const tools = node("aside", "", "report-tools");
-  const editor = node("div", "", "report-editor");
-  const notesHelp = node("p", "Dùng lại các câu đã viết, rồi nối các công đoạn liên quan thành đoạn văn.", "note");
-  tools.append(stageNotes, notesHelp);
-
-  const groups = [
-    ["Introduction", introduction],
-    ["Overview", summary],
-    ...stages.map((stage, i) => ["Stage " + (i + 1) + " · " + stage.name, stage.phrases])
-  ];
-  for (const [heading, items] of groups) {
-    const details = node("details");
-    const list = node("dl");
-    for (const [phrase, meaning] of items) {
-      list.append(node("dt", phrase), node("dd", meaning));
-    }
-    details.append(node("summary", heading), list);
-    tools.append(details);
-  }
-
-  const sections = [
-    ["Introduction", "Diễn đạt lại đề bằng một câu. Nêu sản phẩm và nguyên liệu nếu phù hợp."],
-    ["Overview", "Chọn 2–3 đặc điểm lớn: điểm bắt đầu và kết thúc, sự thay đổi của hỗn hợp hoặc các đầu ra."],
-    ["Body 1", "Nhóm chặng trộn, làm lạnh lần đầu và lên men. Thử dùng after mixing hoặc after which."],
-    ["Body 2", "Nhóm chặng bay hơi và làm lạnh lần cuối. Dùng while để phân biệt hai đầu ra."]
-  ];
-
-  const overview = $("overview");
-  const overviewButton = $("overviewModel");
-  const overviewAnswer = $("overviewAnswer");
-  editor.append(node("h3", "Your report"));
-  const writingFields = sections.map(([title, hint], i) => {
-    const field = i === 1 ? overview : node("textarea");
-    field.id = i === 1 ? "overview" : "report-part-" + i;
-    field.placeholder = i === 1 ? "Overall, …" : "";
-    field.spellcheck = false;
-    const label = node("label", title, "report-label");
-    label.htmlFor = field.id;
-    const help = node("p", hint, "note");
-    help.id = "report-hint-" + i;
-    field.setAttribute("aria-describedby", help.id);
-    editor.append(label, help, field);
-    if (i === 1) {
-      const actions = node("div", "", "actions");
-      overviewButton.className = "ghost";
-      actions.append(overviewButton);
-      editor.append(actions, overviewAnswer);
-    }
-    return field;
-  });
-
-  const count = node("p", "", "note");
-  const compare = node("button", "Compare full report", "primary");
-  compare.type = "button";
-  const answer = node("div", "", "feedback report-model");
-  answer.hidden = true;
-  answer.setAttribute("aria-live", "polite");
-  editor.append(count, compare, answer);
-
-  function wordCount() {
-    return writingFields.reduce((total, field) => {
-      const words = field.value.match(/[\p{L}\p{N}]+(?:[’'-][\p{L}\p{N}]+)*/gu);
-      return total + (words?.length ?? 0);
-    }, 0);
-  }
-
-  function refreshReport() {
-    const words = wordCount();
-    const missing = writingFields.findIndex(field => !field.value.trim());
-    const ready = words >= 150 && missing === -1;
-    count.textContent = words + " / 150 từ"
-      + (missing === -1 ? "" : " · Còn thiếu " + sections[missing][0]);
-    compare.disabled = !ready;
-    if (!ready) {
-      answer.hidden = true;
-      compare.textContent = "Compare full report";
-    }
-  }
-
-  writingFields.forEach(field => field.addEventListener("input", refreshReport));
-
-  compare.onclick = () => {
-    if (!answer.hidden) {
-      answer.hidden = true;
-      compare.textContent = "Compare full report";
-      return;
-    }
-    answer.replaceChildren(node("h3", "Model report"), ...model.map(paragraph => node("p", paragraph)));
-    answer.hidden = false;
-    compare.textContent = "Hide model report";
-  };
-
-  finish.querySelector('label[for="overview"]').remove();
-
-  // The original overview chips are woven into the expanded vocabulary notebook.
-  // Keep their original elements available for the existing game logic.
-  $("overviewVocab").parentElement.querySelector(".hintline").after(layout);
-  $("overviewVocab").style.display = "none";
-  $("overviewGloss").style.display = "none";
-
-  const originalButtonRow = finish.querySelector(":scope > .actions");
-  if (originalButtonRow) originalButtonRow.remove();
-  layout.append(tools, editor);
-
-  const openFinish = showFinish;
-  showFinish = function () {
-    openFinish();
-    writingFields.forEach(field => { field.value = ""; });
-    answer.hidden = true;
-    compare.textContent = "Compare full report";
-    refreshReport();
-  };
-  refreshReport();
-  render();
+function element(tag, text = "", className = "") {
+  const node = document.createElement(tag);
+  node.textContent = text;
+  if (className) node.className = className;
+  return node;
 }
 
-const fileInput = document.getElementById("source");
-const build = document.getElementById("build");
-const status = document.getElementById("status");
+const builtIn = {
+  id:"soft-cheese-lab",
+  title:"Soft Cheese Lab",
+  type:"Process",
+  path:"#soft-cheese-lab",
+  description:"Khám phá quy trình làm phô mai mềm, học cụm từ và viết bài IELTS Task 1.",
+  tags:["cheese","phô mai mềm","milk","fermentation","evaporation"]
+};
+const types = new Set(["Process","Map","Chart","Vocabulary"]);
+let catalog = [builtIn];
+let editing = null;
+let catalogChanged = false;
 
-build.addEventListener("click", async () => {
-  const file = fileInput.files[0];
-  if (!file) {
-    status.textContent = "Chọn file game trước nha.";
+function fold(text) {
+  return text.toLowerCase().normalize("NFD").replace(/\p{M}/gu,"").replace(/đ/g,"d");
+}
+
+function catalogMessage(text, error = false) {
+  $("catalogStatus").textContent = text;
+  $("catalogStatus").classList.toggle("error", error);
+}
+
+function lessonFrom(row) {
+  if (!row || typeof row !== "object") throw Error("Mỗi bài cần là một đối tượng JSON.");
+  const {id,title,type,path,description="",tags=[]} = row;
+  if (typeof id !== "string" || !/^[a-z0-9-]+$/.test(id) ||
+      typeof title !== "string" || !title.trim() || !types.has(type) ||
+      typeof description !== "string" || !Array.isArray(tags) ||
+      tags.some(tag => typeof tag !== "string")) {
+    throw Error("Kiểm tra ID, tên, dạng bài, mô tả và từ khóa.");
+  }
+  const isBuiltIn = id === builtIn.id && path === builtIn.path;
+  const isHtml = typeof path === "string" &&
+    /^(?:[a-z0-9_-]+\/)*[a-z0-9][a-z0-9_.-]*\.html$/i.test(path);
+  if (!isBuiltIn && !isHtml) throw Error("Dùng đường dẫn HTML tương đối, ví dụ lessons/tea.html.");
+  return {id,title:title.trim(),type,path,description:description.trim(),
+    tags:[...new Set(tags.map(tag => tag.trim()).filter(Boolean))]};
+}
+
+function readCatalog(data) {
+  if (!data || data.version !== 1 || !Array.isArray(data.lessons)) {
+    throw Error("JSON cần có version bằng 1 và danh sách lessons.");
+  }
+  const rows = data.lessons.map(lessonFrom);
+  if (new Set(rows.map(row => row.id)).size !== rows.length) throw Error("Có bài trùng ID.");
+  return rows;
+}
+
+function renderCatalog() {
+  const terms = fold($("search").value.trim()).split(/\s+/).filter(Boolean);
+  const type = $("filter").value;
+  const shown = catalog.filter(lesson => {
+    const searchText = fold([lesson.title,lesson.type,lesson.path,lesson.description,...lesson.tags].join(" "));
+    return (!type || lesson.type === type) && terms.every(term => searchText.includes(term));
+  });
+  $("count").textContent = shown.length ? shown.length + " bài" : "Không tìm thấy bài phù hợp.";
+  $("cards").replaceChildren();
+  for (const lesson of shown) {
+    const card = element("article","","card lesson");
+    const open = element("a","Mở bài","button primary");
+    open.href = lesson.path.startsWith("#") ? lesson.path : "./" + lesson.path;
+    const tags = element("div","","chips");
+    for (const tag of [lesson.type,...lesson.tags]) tags.append(element("span",tag,"chip"));
+    const actions = element("div","","row");
+    actions.append(open);
+    if (lesson.id !== builtIn.id) {
+      const edit = element("button","Sửa");
+      edit.type = "button";
+      edit.onclick = () => startEdit(lesson);
+      actions.append(edit);
+    }
+    card.append(element("h2",lesson.title),element("p",lesson.description,"muted"),tags,actions);
+    $("cards").append(card);
+  }
+}
+
+const lessonForm = $("addLesson");
+function startEdit(lesson) {
+  editing = lesson.id;
+  $("manager").open = true;
+  for (const name of ["title","type","path","description"]) {
+    lessonForm.elements.namedItem(name).value = lesson[name];
+  }
+  lessonForm.elements.namedItem("tags").value = lesson.tags.join(", ");
+  $("saveLesson").textContent = "Lưu thay đổi";
+  $("cancelEdit").hidden = false;
+  lessonForm.elements.namedItem("title").focus();
+}
+
+function resetEditor() {
+  editing = null;
+  lessonForm.reset();
+  $("saveLesson").textContent = "Thêm bài";
+  $("cancelEdit").hidden = true;
+}
+
+$("search").oninput = renderCatalog;
+$("filter").onchange = renderCatalog;
+$("cancelEdit").onclick = resetEditor;
+lessonForm.onsubmit = event => {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(lessonForm));
+  const base = fold(data.title).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "lesson";
+  let id = editing || base;
+  for (let i = 2; !editing && catalog.some(lesson => lesson.id === id); i++) id = base + "-" + i;
+  try {
+    const lesson = lessonFrom({...data,id,path:data.path.trim(),tags:data.tags.split(",")});
+    catalog = editing ? catalog.map(row => row.id === id ? lesson : row) : [...catalog,lesson];
+    catalogChanged = true;
+    resetEditor();
+    renderCatalog();
+    catalogMessage("Đã cập nhật danh mục đang mở. Bấm Xuất JSON để lưu.");
+  } catch (error) {
+    catalogMessage(error.message,true);
+  }
+};
+
+$("importJson").onclick = () => $("jsonFile").click();
+$("jsonFile").onchange = async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const incoming = readCatalog(JSON.parse(await file.text()));
+    const merged = new Map(catalog.map(lesson => [lesson.id,lesson]));
+    for (const lesson of incoming) {
+      if (lesson.id !== builtIn.id) merged.set(lesson.id,lesson);
+    }
+    catalog = [...merged.values()];
+    catalogChanged = true;
+    resetEditor();
+    renderCatalog();
+    catalogMessage("Đã nhập JSON. Xuất lại để lưu danh mục đã gộp.");
+  } catch (error) {
+    catalogMessage("Không nhập được JSON. " + error.message,true);
+  } finally {
+    $("jsonFile").value = "";
+  }
+};
+
+$("exportJson").onclick = () => {
+  const data = JSON.stringify({version:1,lessons:catalog},null,2);
+  const url = URL.createObjectURL(new Blob([data + "\n"],{type:"application/json"}));
+  const link = element("a");
+  link.href = url;
+  link.download = "lessons.json";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url),3000);
+};
+
+async function loadCatalog() {
+  if (!/^https?:$/.test(location.protocol)) return;
+  try {
+    const response = await fetch("./lessons.json",{cache:"no-cache"});
+    if (response.status === 404) return;
+    if (!response.ok) throw Error("HTTP " + response.status);
+    const extra = readCatalog(await response.json());
+    if (!catalogChanged) {
+      catalog = [builtIn,...extra.filter(lesson => lesson.id !== builtIn.id)];
+      renderCatalog();
+    }
+  } catch (error) {
+    catalogMessage("Không đọc được lessons.json. " + error.message,true);
+  }
+}
+
+const stages = [
+  {
+    name:"Mixing", facts:"Water + milk · stir",
+    steps:[
+      {guide:"Bấm What is this? trên từng hũ.",actions:[
+        ["milk","What is this?",43,65,"Milk = sữa.","What is this? Hũ bên trái"],
+        ["water","What is this?",105,65,"Water = nước.","What is this? Hũ bên phải"]
+      ]},
+      {guide:"Đổ sữa và nước vào bồn.",actions:[
+        ["pourMilk","Pour milk",43,65,"Sữa đã vào bồn."],
+        ["pourWater","Pour water",105,65,"Nước đã vào bồn."]
+      ]},
+      {guide:"Bấm Stir ba lần để khuấy hỗn hợp.",actions:[
+        ["stir","Stir",174,59,"Sữa và nước đã hòa vào nhau."]
+      ],repeat:3}
+    ],
+    vocab:[
+      ["mix milk and water","trộn sữa và nước · Milk and water are mixed together."],
+      ["stir the mixture","khuấy hỗn hợp · The mixture is stirred."],
+      ["initially","ban đầu · Initially, + mệnh đề"],
+      ["the resulting mixture","hỗn hợp thu được · dùng làm chủ ngữ số ít"],
+      ["after mixing","sau khi trộn · After mixing, the mixture is …"]
+    ],
+    prompt:"Viết một câu cho biết hai nguyên liệu được xử lý thế nào.",
+    model:"Initially, milk and water are mixed together and stirred."
+  },
+  {
+    name:"First cooling", facts:"5°C · 2 hours",
+    steps:[
+      {guide:"Bật máy làm lạnh.",actions:[["cool","Switch on cooling",228,53,"Máy làm lạnh đã bật."]]},
+      {guide:"Bấm màn hình để đọc nhiệt độ.",actions:[["temperature","Read temperature",228,53,"The mixture reaches 5°C."]]},
+      {guide:"Bấm đồng hồ để mô phỏng thời gian.",actions:[["timer2","Run timer",52,80,"The mixture is kept at 5°C for two hours."]]}
+    ],
+    vocab:[
+      ["be cooled to","được làm lạnh đến · is cooled to + nhiệt độ đạt tới"],
+      ["be kept at","được giữ ở · is kept at + nhiệt độ"],
+      ["for two hours","trong hai giờ · for + khoảng thời gian"],
+      ["before salt is added","trước khi thêm muối · The mixture is cooled before salt is added."]
+    ],
+    prompt:"Nêu nhiệt độ và thời gian làm lạnh lần đầu.",
+    model:"The resulting mixture is cooled to 5°C and kept at that temperature for two hours."
+  },
+  {
+    name:"Fermentation", facts:"Add salt · 35°C · 6 hours",
+    steps:[
+      {guide:"Kiểm tra lọ nhỏ để tìm nguyên liệu tiếp theo.",actions:[["salt","What is this?",70,83,"Salt = muối."]]},
+      {guide:"Bấm vào lọ để rắc muối.",actions:[["addSalt","Add salt",70,83,"Salt is added to the mixture."]]},
+      {guide:"Bật chế độ lên men.",actions:[["ferment","Ferment",228,53,"Fermentation takes place at 35°C for six hours."]]}
+    ],
+    vocab:[
+      ["salt is subsequently added","muối được thêm vào sau đó · subsequently đứng trước added"],
+      ["fermentation takes place","quá trình lên men diễn ra · takes place at + nhiệt độ"],
+      ["after which","sau đó · mệnh đề 1, after which + mệnh đề 2"],
+      ["for a further six hours","trong sáu giờ tiếp theo · dùng sau một công đoạn đã nêu"]
+    ],
+    prompt:"Nối hai thao tác thêm muối và lên men. Nêu nhiệt độ lẫn thời gian.",
+    model:"Salt is subsequently added, after which fermentation takes place at 35°C for six hours."
+  },
+  {
+    name:"Evaporation", facts:"100°C · 8 hours · steam",
+    steps:[
+      {guide:"Bật bộ gia nhiệt dưới bồn.",actions:[["heat","Switch on heat",155,118,"The mixture is heated to 100°C."]]},
+      {guide:"Chạy đồng hồ và nhìn ống thoát phía trên.",actions:[["timer8","Run timer",52,80,"Eight hours pass."]]},
+      {guide:"Kiểm tra ống thoát.",actions:[["vent","Inspect vent",159,36,"Moisture escapes as steam = hơi nước thoát ra."]]}
+    ],
+    vocab:[
+      ["once fermentation is complete","sau khi lên men xong · Once fermentation is complete, + mệnh đề"],
+      ["be heated to","được đun đến · is heated to + nhiệt độ"],
+      ["moisture escapes as steam","hơi ẩm thoát ra dưới dạng hơi nước"],
+      ["through an outlet at the top","qua lỗ thoát phía trên"],
+      ["allowing moisture to escape","nhờ đó hơi ẩm thoát ra · allowing + danh từ + to + động từ"]
+    ],
+    prompt:"Nêu điều kiện đun và giải thích hơi nước thoát ra ở đâu.",
+    model:"The mixture is heated to 100°C for eight hours, allowing moisture to escape as steam through an outlet at the top."
+  },
+  {
+    name:"Final cooling", facts:"5°C · 6 hours · cheese + wastewater",
+    steps:[
+      {guide:"Bật chế độ làm lạnh lần cuối.",actions:[["coolAgain","Switch on cooling",228,53,"The mixture reaches 5°C again."]]},
+      {guide:"Chạy đồng hồ mô phỏng sáu giờ làm lạnh.",actions:[["timer6","Run timer",52,80,"The mixture is kept at 5°C for six hours."]]},
+      {guide:"Mở riêng hai đầu lọc và quan sát hai đầu ra.",actions:[
+        ["cheese","Upper filter",230,76,"Soft cheese is collected through the upper filter."],
+        ["wastewater","Lower filter",231,112,"Wastewater drains out through the lower filter."]
+      ]}
+    ],
+    vocab:[
+      ["be cooled again","được làm lạnh lần nữa · is cooled again and kept at …"],
+      ["be separated by filtration","được tách qua quá trình lọc"],
+      ["wastewater drains out","nước thải chảy ra · through the lower filter"],
+      ["soft cheese is collected","phô mai mềm được thu lại · through the upper filter"],
+      ["while","trong khi · dùng để mô tả hai đầu ra trong cùng một câu"]
+    ],
+    prompt:"Viết một hoặc hai câu về lần làm lạnh cuối và hai đầu ra.",
+    model:"The mixture is cooled again and kept at 5°C for six hours. Wastewater drains through the lower filter, while soft cheese is collected through the upper filter."
+  }
+];
+
+let stageIndex = 0, stepIndex = 0, turns = 0, playing = false;
+let done = new Set();
+const drafts = [];
+let soundOn = false, audioContext;
+
+function beep(notes) {
+  if (!soundOn) return;
+  const Engine = window.AudioContext || window.webkitAudioContext;
+  if (!Engine) return;
+  try {
+    audioContext ||= new Engine();
+    if (audioContext.state === "suspended") audioContext.resume().catch(() => {});
+    const now = audioContext.currentTime;
+    notes.forEach((frequency,i) => {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const time = now + i * .085;
+      oscillator.type = "square";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(.035,time);
+      gain.gain.exponentialRampToValueAtTime(.001,time + .12);
+      oscillator.connect(gain).connect(audioContext.destination);
+      oscillator.start(time);
+      oscillator.stop(time + .13);
+    });
+  } catch {}
+}
+
+$("sound").onclick = () => {
+  soundOn = !soundOn;
+  $("sound").textContent = soundOn ? "Tắt âm thanh" : "Bật âm thanh";
+  $("sound").setAttribute("aria-pressed",String(soundOn));
+  beep([440,660]);
+};
+
+const ctx = $("canvas").getContext("2d");
+function rect(x,y,w,h,color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.round(x),Math.round(y),w,h);
+}
+function pixelText(text,x,y,color="#fff1c5") {
+  ctx.fillStyle = color;
+  ctx.font = "bold 8px monospace";
+  ctx.fillText(text,x,y);
+}
+
+function draw(action="", progress=0) {
+  const n = stageIndex;
+  const has = id => done.has(id) || action === id;
+  const movement = Math.floor(progress * 14);
+  rect(0,0,280,156,"#253f36");
+  for (let x=0;x<280;x+=16) rect(x,0,1,118,"#2d493e");
+  for (let y=8;y<118;y+=16) rect(0,y,280,1,"#1f362e");
+  rect(15,12,64,50,"#725640"); rect(19,16,56,41,"#263b4c");
+  rect(45,16,3,41,"#725640"); rect(19,36,56,3,"#725640");
+  rect(12,58,69,5,"#ab7953");
+  rect(31,22,1,1,"#e6ca83"); rect(63,25,4,4,"#f4d387");
+  rect(190,32,70,4,"#986c49");
+  for (let i=0;i<4;i++) {
+    rect(196+i*16,19,9,13,["#acb9a1","#cb9d6e","#7da7a1","#baad83"][i]);
+    rect(198+i*16,16,5,3,"#dab487");
+  }
+  rect(0,125,280,8,"#ad8056"); rect(0,133,280,7,"#6e503b");
+  rect(0,140,280,16,"#172a21");
+  rect(13,140,8,12,"#6e503b"); rect(255,140,8,12,"#6e503b");
+
+  const left = n === 0 ? 126 : 106;
+  const width = n === 0 ? 100 : 96;
+  rect(left,74,width,8,"#c3c8ae");
+  rect(left+4,82,width-8,35,"#799789");
+  rect(left+9,86,width-18,25,"#344f45");
+  rect(left+13,117,width-26,7,"#647f72");
+
+  if (n === 0) {
+    const poured = Number(has("pourMilk")) + Number(has("pourWater"));
+    if (poured) {
+      const color = turns >= 2 ? "#ead394" : has("pourMilk") ? "#fae7bd" : "#87b9ca";
+      rect(139,110-poured*8,74,poured*8,color);
+      if (poured === 2 && turns < 2) {
+        for (let i=0;i<7;i++) rect(139+i*10,95+(i+movement)%3,8,turns?4:7,"#87b9ca");
+      }
+    }
+    for (const [x,id,pour,label,color] of [
+      [34,"milk","pourMilk","MILK","#f4e4bc"],
+      [96,"water","pourWater","WATER","#8fc3d8"]
+    ]) {
+      const lift = action === pour ? Math.sin(progress*Math.PI) : 0;
+      const jarX = x+(159-x)*lift, jarY = 105-62*lift;
+      ctx.save();
+      ctx.translate(jarX,jarY);
+      ctx.rotate(lift*1.65);
+      rect(0,-12,19,26,"#91aea5"); rect(4,-17,11,5,"#d2bc8e");
+      rect(2,-8,15,17,done.has(pour) ? "#49675b" : color);
+      if (has(id)) {
+        rect(1,-4,17,8,"#f7edd2");
+        ctx.font = "5px monospace"; ctx.fillStyle = "#2b2118"; ctx.fillText(label,2,2);
+      }
+      ctx.restore();
+      if (lift > .55) for (let i=0;i<6;i++) rect(163+i%2*3,54+(i*7+movement)%39,3,4,color);
+    }
+    if (done.has("pourMilk") && done.has("pourWater")) {
+      const angle = action === "stir" ? progress*2*Math.PI : turns*Math.PI/4;
+      ctx.save(); ctx.translate(175+Math.sin(angle)*15,102);
+      ctx.rotate(Math.sin(angle)*.62);
+      rect(-2,-37,5,37,"#dca675"); rect(-5,-4,11,8,"#b8865b"); ctx.restore();
+      if (action === "stir") {
+        ctx.strokeStyle = "#fff1c1"; ctx.lineWidth = 2; ctx.beginPath();
+        ctx.ellipse(175,101,31,7,0,angle,angle+4.5); ctx.stroke();
+      }
+    }
+  } else {
+    rect(119,91,70,19,n >= 3 ? "#d9b063" : "#ecd48f"); rect(121,91,66,2,"#ffecb3");
+  }
+
+  if (n === 1 || n === 2 || n === 4) {
+    rect(207,61,45,22,"#9aaf9e"); rect(210,64,39,16,"#172b24");
+    pixelText(has("cool") || has("coolAgain") ? "5°C" : has("ferment") ? "35°C" : "OFF",219,75);
+  }
+  if (n === 1 || n === 3 || n === 4) {
+    rect(40,89,25,33,"#bbac81"); rect(43,94,19,22,"#263932");
+    const max = n === 1 ? 2 : n === 3 ? 8 : 6;
+    const id = "timer"+max;
+    const hours = done.has(id) ? max : action === id ? Math.floor(max*progress) : 0;
+    pixelText(hours+" h",45,107);
+  }
+  if (n === 2) {
+    const shift = action === "addSalt" ? Math.sin(Math.PI*progress) : 0;
+    rect(62+shift*76,101-shift*52,16,21,"#cdb58c");
+    rect(65+shift*76,98-shift*52,10,3,"#e3dbc2");
+    if (has("salt")) pixelText("SALT",61+shift*76,116-shift*52);
+    if (shift > .4) for (let i=0;i<7;i++) rect(143+i%3,67+(i*6+movement)%27,2,2,"#fff1d2");
+  }
+  if (n === 3) {
+    rect(153,19,12,55,"#78928a"); rect(149,17,20,5,"#adc0b5");
+    rect(119,116,67,8,has("heat")?"#e99156":"#6b5344");
+    if (has("heat")) pixelText("100°C",205,91,"#ffd08b");
+    if (has("timer8")) for (let i=0;i<6;i++) {
+      rect(146+(i*8+movement)%24,4+(i*5+movement)%13,5,3,"#dfebe2");
+    }
+  }
+  if (n === 4) {
+    for (const [y,id,color] of [[88,"cheese","#ffe08a"],[111,"wastewater","#83beb6"]]) {
+      rect(193,y,34,6,"#91ab9b");
+      for (let x=196;x<207;x+=3) rect(x,y,1,6,"#3a554b");
+      rect(223,y+4,4,5,"#91ab9b");
+      if (has(id)) {
+        rect(224,y+9,3,6,color); rect(228,y+13,20,4,color);
+      }
+    }
+  }
+  if (has("ferment") || has("heat") || has("cool") || has("coolAgain")) {
+    for (let i=0;i<7;i++) rect(121+i*10,89+(i*5+movement)%13,2,2,"#fff0b9");
+  }
+}
+
+function progressBar() {
+  $("stages").replaceChildren(...stages.map((stage,i) => {
+    const marker = element("span",stage.name);
+    if (i === stageIndex) marker.setAttribute("aria-current","step");
+    if (i < stageIndex) marker.textContent = "✓ " + stage.name;
+    return marker;
+  }));
+}
+
+function phraseButtons(items) {
+  const area = $("stagePhrases");
+  area.replaceChildren();
+  $("gloss").hidden = true;
+  for (const [term,meaning] of items) {
+    const button = element("button",term,"chip");
+    button.type = "button";
+    button.setAttribute("aria-pressed","false");
+    button.onclick = () => {
+      for (const chip of area.children) chip.setAttribute("aria-pressed",String(chip === button));
+      $("gloss").textContent = meaning;
+      $("gloss").hidden = false;
+    };
+    area.append(button);
+  }
+}
+
+function showStage() {
+  const stage = stages[stageIndex];
+  stepIndex = 0; turns = 0; playing = false; done = new Set();
+  $("workbench").hidden = false;
+  $("report").hidden = true;
+  $("stageTitle").textContent = stage.name;
+  $("observation").textContent = "";
+  $("notebook").hidden = $("stageAnswer").hidden = true;
+  $("locked").hidden = false;
+  $("stageDraft").value = "";
+  $("next").disabled = true;
+  $("stagePrompt").textContent = stage.prompt;
+  phraseButtons(stage.vocab);
+  progressBar();
+  controls();
+  draw();
+}
+
+function controls() {
+  const step = stages[stageIndex].steps[stepIndex];
+  const hot = $("hotspots");
+  hot.replaceChildren();
+  if (!step) {
+    $("instruction").textContent = "Công đoạn hoàn tất. Mở sổ từ vựng và viết câu.";
+    $("locked").hidden = true;
+    $("notebook").hidden = false;
     return;
   }
-  build.disabled = true;
-  try {
-    const html = await file.text();
-    const required = [
-      'id="hotspots"', 'id="finish"', 'id="sentences"', 'id="overviewVocab"',
-      'function showFinish()', 'const stages = ['
-    ];
-    if (!required.every(marker => html.includes(marker))) {
-      throw new Error("Hãy chọn bản Soft Cheese Lab có nút What is this? trên hai hũ.");
-    }
-    if (html.includes('id="soft-cheese-full-report"')) {
-      throw new Error("File này đã có màn Write the full report.");
-    }
-    if (!/<\/body\s*>/i.test(html)) throw new Error("File HTML thiếu phần kết thúc.");
-    const script = '<script id="soft-cheese-full-report">('
-      + installReport.toString() + ')();<' + '/script>\n';
-    const upgraded = html.replace(/<\/body\s*>/i, match => script + match);
-    const url = URL.createObjectURL(new Blob([upgraded], { type: "text/html;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Soft_Cheese_Lab.html";
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 3000);
-    status.textContent = "Đã tạo bản nâng cấp. Mở file vừa tải và chơi hết 5 chặng để tới màn viết bài.";
-  } catch (error) {
-    status.textContent = error.message;
-  } finally {
-    build.disabled = false;
+  $("instruction").textContent = step.guide;
+  for (const [id,label,x,y,result,accessible] of step.actions) {
+    const revealed = id === "milk" ? "Milk" : id === "water" ? "Water" : "✓ " + label;
+    const text = done.has(id) ? revealed : step.repeat ? label + " · " + turns + "/" + step.repeat : label;
+    const button = element("button",text,"hotspot");
+    button.type = "button";
+    button.style.left = x/280*100 + "%";
+    button.style.top = y/156*100 + "%";
+    button.disabled = done.has(id);
+    if (accessible && !button.disabled) button.setAttribute("aria-label",accessible);
+    button.onclick = event => perform(id,result,step,event.detail === 0);
+    hot.append(button);
   }
-});
+}
+
+function perform(id,result,step,keyboard) {
+  if (playing || done.has(id)) return;
+  playing = true;
+  for (const button of $("hotspots").children) button.disabled = true;
+  beep([330,440]);
+  function finishAction() {
+    playing = false;
+    if (step.repeat) turns++;
+    if (!step.repeat || turns >= step.repeat) done.add(id);
+    $("observation").textContent = step.repeat && !done.has(id) ? "Stir the mixture · " + turns + "/3" : result;
+    if (step.actions.every(([key]) => done.has(key))) stepIndex++;
+    controls();
+    draw();
+    if (!$("notebook").hidden) beep([523,659,784]);
+    if (keyboard) ($("hotspots").querySelector("button:not(:disabled)") || $("stageDraft")).focus();
+  }
+  const inspect = ["milk","water","salt","temperature","vent"].includes(id);
+  if (inspect || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    finishAction();
+    return;
+  }
+  let start;
+  function frame(now) {
+    start ??= now;
+    const progress = (now-start)/(id.startsWith("timer") ? 1050 : 650);
+    if (progress >= 1) { finishAction(); return; }
+    draw(id,progress);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+$("stageDraft").oninput = () => { $("next").disabled = !$("stageDraft").value.trim(); };
+$("stageCompare").onclick = () => {
+  $("stageAnswer").textContent = $("stageDraft").value.trim()
+    ? stages[stageIndex].model : "M viết thử một câu trước nha.";
+  $("stageAnswer").hidden = false;
+};
+$("next").onclick = () => {
+  const text = $("stageDraft").value.trim();
+  if (!text || $("notebook").hidden) return;
+  drafts.push(text);
+  stageIndex++;
+  if (stageIndex === stages.length) showReport();
+  else {
+    showStage();
+    $("hotspots").querySelector("button").focus();
+  }
+};
+
+const introVocab = [
+  ["illustrate how … is produced","The diagram illustrates how ___ is produced."],
+  ["the stages involved in producing","The diagram shows the stages involved in producing ___."]
+];
+const overviewVocab = [
+  ["consist of five stages","gồm năm công đoạn · The process consists of five stages."],
+  ["begin with / end with","bắt đầu / kết thúc bằng · It begins with ___ and ends with ___."],
+  ["gradually thicken","dần đặc lại · The mixture gradually thickens."],
+  ["be released at different stages","được thải ra ở các công đoạn khác nhau"],
+  ["take the longest","mất nhiều thời gian nhất · The ___ stage takes the longest."]
+];
+const reportSections = [
+  ["Introduction","Diễn đạt lại đề bằng một câu."],
+  ["Overview","Chọn 2–3 đặc điểm lớn. Cân nhắc điểm đầu, điểm cuối, độ đặc và các đầu ra."],
+  ["Body 1","Nhóm ba chặng đầu. Nối câu bằng after mixing hoặc after which."],
+  ["Body 2","Nhóm hai chặng cuối. Dùng while để phân biệt chất ra từ hai bộ lọc."]
+];
+const modelReport = [
+  "The diagram illustrates how soft cheese is produced from milk and water.",
+  "Overall, the process consists of five stages, beginning with the mixing of the two ingredients and ending with cooling and filtration. The mixture gradually thickens, and steam and wastewater are released at different stages. Evaporation is the longest stage.",
+  "Initially, milk and water are combined and stirred. The resulting mixture is then cooled and kept at 5°C for two hours. Salt is subsequently added, after which fermentation takes place at 35°C for six hours.",
+  "Once fermentation is complete, the mixture is heated to 100°C for eight hours. During this stage, moisture escapes as steam through an outlet at the top. The thickened mixture is then cooled again and kept at 5°C for a further six hours. Finally, the two outputs are separated by filtration. Wastewater drains through the lower filter, while the finished soft cheese is collected through the upper filter."
+];
+let reportInputs = [];
+function details(title,content) {
+  const box = element("details");
+  box.append(element("summary",title),content);
+  return box;
+}
+function refreshWords() {
+  const words = reportInputs.reduce((sum,input) =>
+    sum + (input.value.match(/\S+/g)?.length || 0),0);
+  const complete = reportInputs.every(input => input.value.trim());
+  $("words").textContent = words + " / 150 từ"
+    + (complete ? "" : " · Điền đủ 4 phần để mở bài mẫu");
+  $("reportCompare").disabled = words < 150 || !complete;
+  if ($("reportCompare").disabled) {
+    $("reportAnswer").hidden = true;
+    $("reportCompare").textContent = "Xem bài mẫu";
+  }
+}
+
+function showReport() {
+  progressBar();
+  $("workbench").hidden = true;
+  $("report").hidden = false;
+  $("reportAnswer").hidden = true;
+  $("reportCompare").textContent = "Xem bài mẫu";
+  $("flow").replaceChildren(...stages.map(stage => {
+    const tile = element("div");
+    tile.append(element("strong",stage.name),element("span",stage.facts));
+    return tile;
+  }));
+  const notes = element("ol");
+  notes.append(...drafts.map((draft,i) => element("li",stages[i].name + " · " + draft)));
+  const notesBox = details("5 câu m đã viết",notes);
+  notesBox.open = true;
+  $("reference").replaceChildren(notesBox);
+  for (const [name,items] of [
+    ["Từ vựng · Introduction",introVocab],["Từ vựng · Overview",overviewVocab],
+    ...stages.map(stage => [stage.name,stage.vocab])
+  ]) {
+    const list = element("dl");
+    for (const [term,meaning] of items) list.append(element("dt",term),element("dd",meaning));
+    $("reference").append(details(name,list));
+  }
+  $("reportFields").replaceChildren();
+  reportInputs = reportSections.map(([title,hint],i) => {
+    const label = element("label",title);
+    const input = element("textarea");
+    input.id = "report-input-" + i;
+    input.spellcheck = false;
+    const help = element("span",hint,"note");
+    help.id = "report-hint-" + i;
+    input.setAttribute("aria-describedby",help.id);
+    input.oninput = refreshWords;
+    label.htmlFor = input.id;
+    label.append(help,input);
+    $("reportFields").append(label);
+    return input;
+  });
+  refreshWords();
+  $("report").scrollIntoView({block:"start"});
+}
+
+$("reportCompare").onclick = () => {
+  const answer = $("reportAnswer");
+  answer.hidden = !answer.hidden;
+  $("reportCompare").textContent = answer.hidden ? "Xem bài mẫu" : "Ẩn bài mẫu";
+  if (!answer.hidden) {
+    answer.replaceChildren(element("h3","Model report"),...modelReport.map(text => element("p",text)));
+  }
+};
+$("restart").onclick = () => {
+  if (!confirm("Chơi lại sẽ xóa các câu và bài viết trong lượt này. Tiếp tục?")) return;
+  stageIndex = 0;
+  drafts.length = 0;
+  showStage();
+  $("game").scrollIntoView({block:"start"});
+};
+
+function route() {
+  const inGame = location.hash === builtIn.path;
+  $("home").hidden = inGame;
+  $("game").hidden = !inGame;
+  $("homeLink").hidden = $("sound").hidden = !inGame;
+  document.title = inGame ? "Soft Cheese Lab | IELTS Writing Task 1" : "Thư viện IELTS Writing Task 1";
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+showStage();
+renderCatalog();
+route();
+loadCatalog();
 </script>
 </body>
 </html>
