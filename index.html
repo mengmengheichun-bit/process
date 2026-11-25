@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nâng cấp Soft Cheese Lab</title>
+<style>
+  body {
+    margin: 0; background: #10201b; color: #fff4de;
+    font: 1rem/1.6 system-ui, sans-serif;
+  }
+  main { max-width: 680px; margin: 8vh auto; padding: 24px; }
+  label { display: block; margin-bottom: 6px; }
+  button { display: block; margin-top: 16px; padding: 10px 15px; font: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Nâng cấp Soft Cheese Lab</h1>
+  <label for="source">Chọn file Soft_Cheese_Lab.html hiện tại</label>
+  <input id="source" type="file" accept=".html,.htm,text/html">
+  <button id="build" type="button">Tải bản nâng cấp</button>
+  <p id="status" role="status"></p>
+</main>
+<script>
+function installReport() {
+  const additions = [
+    [
+      ["mix milk and water", "trộn sữa và nước · Milk and water are mixed together."],
+      ["after mixing", "sau khi trộn · After mixing, the mixture is …"]
+    ],
+    [
+      ["be kept at", "được giữ ở · The mixture is kept at ___°C for ___ hours."],
+      ["before salt is added", "trước khi thêm muối · The mixture is cooled before salt is added."]
+    ],
+    [
+      ["subsequently", "tiếp đó · Salt is subsequently added to the mixture."],
+      ["for a further six hours", "trong sáu giờ tiếp theo · The mixture ferments for a further six hours."]
+    ],
+    [
+      ["once fermentation is complete", "sau khi lên men xong · Once fermentation is complete, the mixture is …"],
+      ["through an outlet at the top", "qua lỗ thoát phía trên · Steam escapes through an outlet at the top."]
+    ],
+    [
+      ["be separated by filtration", "được tách bằng cách lọc · The two outputs are separated by filtration."],
+      ["through the upper / lower filter", "qua bộ lọc trên / dưới · The finished product is collected through …"]
+    ]
+  ];
+
+  const introduction = [
+    ["illustrate how … is produced", "mô tả cách sản xuất · The diagram illustrates how ___ is produced."],
+    ["the stages involved in producing", "các công đoạn sản xuất · The diagram shows the stages involved in producing ___."]
+  ];
+
+  const summary = [
+    ["consist of five stages", "gồm năm công đoạn · The process consists of five stages."],
+    ["begin with / end with", "bắt đầu / kết thúc bằng · It begins with ___ and ends with ___."],
+    ["gradually thicken", "dần đặc lại · The mixture gradually thickens."],
+    ["be released at different stages", "được thải ra ở các công đoạn khác nhau · ___ and ___ are released at different stages."],
+    ["take the longest", "mất nhiều thời gian nhất · The ___ stage takes the longest."]
+  ];
+
+  const model = [
+    "The diagram illustrates how soft cheese is produced from milk and water.",
+    "Overall, the process consists of five stages, beginning with the mixing of the two ingredients and ending with cooling and filtration. The mixture gradually thickens, and steam and wastewater are released at different stages. Evaporation is the longest stage.",
+    "Initially, milk and water are combined and stirred. The resulting mixture is then cooled and kept at 5°C for two hours. Salt is subsequently added, after which fermentation takes place at 35°C for six hours.",
+    "Once fermentation is complete, the mixture is heated to 100°C for eight hours. During this stage, moisture escapes as steam through an outlet at the top. The thickened mixture is then cooled again and kept at 5°C for a further six hours. Finally, the two outputs are separated by filtration. Wastewater drains through the lower filter, while the finished soft cheese is collected through the upper filter."
+  ];
+
+  additions.forEach((items, i) => stages[i].phrases.push(...items));
+  stages[1].check = "Dùng to cho mức nhiệt đạt tới, at cho mức nhiệt được giữ và for cho thời lượng. Có thể viết: cooled to 5°C and kept at that temperature for two hours.";
+
+  const node = (tag, text, className) => {
+    const element = document.createElement(tag);
+    if (text) element.textContent = text;
+    if (className) element.className = className;
+    return element;
+  };
+
+  const style = node("style", `
+    .report-layout { display:grid; grid-template-columns:minmax(250px,1fr) minmax(320px,1.35fr); gap:16px; margin-top:18px; }
+    .report-layout > * { min-width:0; }
+    .report-tools { display:grid; gap:10px; align-content:start; }
+    .report-tools details { padding:10px 12px; border:1px solid var(--line); border-radius:4px; }
+    .report-tools summary { cursor:pointer; color:var(--green); font-weight:700; }
+    .report-tools dd { margin:2px 0 10px; color:var(--dim); }
+    .report-tools dt { color:var(--ink); font-weight:650; }
+    .report-editor textarea { min-height:90px; }
+    .report-editor .note { margin-bottom:6px; }
+    .report-label { display:block; margin-top:12px; font-weight:700; }
+    .report-model p + p { margin-top:10px; }
+    @media(max-width:760px){ .report-layout {grid-template-columns:1fr;} }
+  `);
+  document.head.append(style);
+
+  const finish = $("finish");
+  finish.querySelector("h2").textContent = "Write the full report";
+  const stageNotes = finish.querySelector(".drafts");
+  stageNotes.querySelector("summary").textContent = "Your five stage notes";
+  const layout = node("div", "", "report-layout");
+  const tools = node("aside", "", "report-tools");
+  const editor = node("div", "", "report-editor");
+  const notesHelp = node("p", "Dùng lại các câu đã viết, rồi nối các công đoạn liên quan thành đoạn văn.", "note");
+  tools.append(stageNotes, notesHelp);
+
+  const groups = [
+    ["Introduction", introduction],
+    ["Overview", summary],
+    ...stages.map((stage, i) => ["Stage " + (i + 1) + " · " + stage.name, stage.phrases])
+  ];
+  for (const [heading, items] of groups) {
+    const details = node("details");
+    const list = node("dl");
+    for (const [phrase, meaning] of items) {
+      list.append(node("dt", phrase), node("dd", meaning));
+    }
+    details.append(node("summary", heading), list);
+    tools.append(details);
+  }
+
+  const sections = [
+    ["Introduction", "Diễn đạt lại đề bằng một câu. Nêu sản phẩm và nguyên liệu nếu phù hợp."],
+    ["Overview", "Chọn 2–3 đặc điểm lớn: điểm bắt đầu và kết thúc, sự thay đổi của hỗn hợp hoặc các đầu ra."],
+    ["Body 1", "Nhóm chặng trộn, làm lạnh lần đầu và lên men. Thử dùng after mixing hoặc after which."],
+    ["Body 2", "Nhóm chặng bay hơi và làm lạnh lần cuối. Dùng while để phân biệt hai đầu ra."]
+  ];
+
+  const overview = $("overview");
+  const overviewButton = $("overviewModel");
+  const overviewAnswer = $("overviewAnswer");
+  editor.append(node("h3", "Your report"));
+  const writingFields = sections.map(([title, hint], i) => {
+    const field = i === 1 ? overview : node("textarea");
+    field.id = i === 1 ? "overview" : "report-part-" + i;
+    field.placeholder = i === 1 ? "Overall, …" : "";
+    field.spellcheck = false;
+    const label = node("label", title, "report-label");
+    label.htmlFor = field.id;
+    const help = node("p", hint, "note");
+    help.id = "report-hint-" + i;
+    field.setAttribute("aria-describedby", help.id);
+    editor.append(label, help, field);
+    if (i === 1) {
+      const actions = node("div", "", "actions");
+      overviewButton.className = "ghost";
+      actions.append(overviewButton);
+      editor.append(actions, overviewAnswer);
+    }
+    return field;
+  });
+
+  const count = node("p", "", "note");
+  const compare = node("button", "Compare full report", "primary");
+  compare.type = "button";
+  const answer = node("div", "", "feedback report-model");
+  answer.hidden = true;
+  answer.setAttribute("aria-live", "polite");
+  editor.append(count, compare, answer);
+
+  function wordCount() {
+    return writingFields.reduce((total, field) => {
+      const words = field.value.match(/[\p{L}\p{N}]+(?:[’'-][\p{L}\p{N}]+)*/gu);
+      return total + (words?.length ?? 0);
+    }, 0);
+  }
+
+  function refreshReport() {
+    const words = wordCount();
+    const missing = writingFields.findIndex(field => !field.value.trim());
+    const ready = words >= 150 && missing === -1;
+    count.textContent = words + " / 150 từ"
+      + (missing === -1 ? "" : " · Còn thiếu " + sections[missing][0]);
+    compare.disabled = !ready;
+    if (!ready) {
+      answer.hidden = true;
+      compare.textContent = "Compare full report";
+    }
+  }
+
+  writingFields.forEach(field => field.addEventListener("input", refreshReport));
+
+  compare.onclick = () => {
+    if (!answer.hidden) {
+      answer.hidden = true;
+      compare.textContent = "Compare full report";
+      return;
+    }
+    answer.replaceChildren(node("h3", "Model report"), ...model.map(paragraph => node("p", paragraph)));
+    answer.hidden = false;
+    compare.textContent = "Hide model report";
+  };
+
+  finish.querySelector('label[for="overview"]').remove();
+
+  // The original overview chips are woven into the expanded vocabulary notebook.
+  // Keep their original elements available for the existing game logic.
+  $("overviewVocab").parentElement.querySelector(".hintline").after(layout);
+  $("overviewVocab").style.display = "none";
+  $("overviewGloss").style.display = "none";
+
+  const originalButtonRow = finish.querySelector(":scope > .actions");
+  if (originalButtonRow) originalButtonRow.remove();
+  layout.append(tools, editor);
+
+  const openFinish = showFinish;
+  showFinish = function () {
+    openFinish();
+    writingFields.forEach(field => { field.value = ""; });
+    answer.hidden = true;
+    compare.textContent = "Compare full report";
+    refreshReport();
+  };
+  refreshReport();
+  render();
+}
+
+const fileInput = document.getElementById("source");
+const build = document.getElementById("build");
+const status = document.getElementById("status");
+
+build.addEventListener("click", async () => {
+  const file = fileInput.files[0];
+  if (!file) {
+    status.textContent = "Chọn file game trước nha.";
+    return;
+  }
+  build.disabled = true;
+  try {
+    const html = await file.text();
+    const required = [
+      'id="hotspots"', 'id="finish"', 'id="sentences"', 'id="overviewVocab"',
+      'function showFinish()', 'const stages = ['
+    ];
+    if (!required.every(marker => html.includes(marker))) {
+      throw new Error("Hãy chọn bản Soft Cheese Lab có nút What is this? trên hai hũ.");
+    }
+    if (html.includes('id="soft-cheese-full-report"')) {
+      throw new Error("File này đã có màn Write the full report.");
+    }
+    if (!/<\/body\s*>/i.test(html)) throw new Error("File HTML thiếu phần kết thúc.");
+    const script = '<script id="soft-cheese-full-report">('
+      + installReport.toString() + ')();<' + '/script>\n';
+    const upgraded = html.replace(/<\/body\s*>/i, match => script + match);
+    const url = URL.createObjectURL(new Blob([upgraded], { type: "text/html;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Soft_Cheese_Lab.html";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    status.textContent = "Đã tạo bản nâng cấp. Mở file vừa tải và chơi hết 5 chặng để tới màn viết bài.";
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    build.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
