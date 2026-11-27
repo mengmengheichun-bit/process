@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "soft-cheese-lab",
+      "title": "Soft Cheese Lab",
+      "type": "Process",
+      "path": "#soft-cheese-lab",
+      "description": "Khám phá quy trình làm phô mai mềm, học cụm từ và viết bài IELTS Task 1.",
+      "tags": [
+        "cheese",
+        "phô mai mềm",
+        "milk",
+        "fermentation",
+        "evaporation"
+      ]
+    },
+    {
+      "id": "landfill-lab",
+      "title": "Landfill Lab",
+      "type": "Process",
+      "path": "Landfill_Lab.html",
+      "description": "",
+      "tags": []
+    }
+  ]
+}
